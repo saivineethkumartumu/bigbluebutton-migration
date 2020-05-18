@@ -50,7 +50,10 @@ bbb-conf --setip $DST_HOSTNAME
 docker-compose -f $GREENLIGHT/docker-compose.yml up -d
 # start up BBB
 bbb-conf --start
+
 # run checks
+echo "=== I'm waiting for some seconds to give services some time to spin up..."
+sleep 30
 bbb-conf --check
 # print status
 bbb-conf --status
