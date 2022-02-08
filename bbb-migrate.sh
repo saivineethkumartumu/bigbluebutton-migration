@@ -40,32 +40,47 @@ GREENLIGHT="/root/greenlight"
 # Where greenlight was installed to by bbb-install.sh on the old server
 SRC_GREENLIGHT="/home/marc/greenlight"
 
+function stop_services() {
+    # Stop BBB
+    bbb-conf --stop
+    # Also stop Greenlight, as we are syncing the PostgreSQL database
+    docker-compose -f $GREENLIGHT/docker-compose.yml down
+}
 
-# Stop BBB
-bbb-conf --stop
-# Also stop Greenlight, as we are syncing the PostgreSQL database
-docker-compose -f $GREENLIGHT/docker-compose.yml down
+function rsync_all() {
+    # Sync Greenlight PostgreSQL database
+    $RSYNC $SRC:$SRC_GREENLIGHT/db/ $GREENLIGHT/db/
+    # Sync recordings
+    $RSYNC $SRC:/var/bigbluebutton/ /var/bigbluebutton/
+    # Sync whatever is in the freeswitch directory, if anything
+    $RSYNC $SRC:/var/freeswitch/meetings/ /var/freeswitch/meetings/
+    # NOTE: that's only something on my system; just remove it.
+    $RSYNC $SRC:/docker-compose/ /docker-compose/ 
+}
 
-# Sync Greenlight PostgreSQL database
-$RSYNC $SRC:$SRC_GREENLIGHT/db/ $GREENLIGHT/db/
-# Sync recordings
-$RSYNC $SRC:/var/bigbluebutton/ /var/bigbluebutton/
-# Sync whatever is in the freeswitch directory, if anything
-$RSYNC $SRC:/var/freeswitch/meetings/ /var/freeswitch/meetings/
-# NOTE: that's only something on my system; just remove it.
-$RSYNC $SRC:/docker-compose/ /docker-compose/ 
+function fix_things() {
+    # Fix the hostname in the recordings
+    bbb-conf --setip $DST_HOSTNAME
+}
 
-# Fix the hostname in the recordings
-bbb-conf --setip $DST_HOSTNAME
+function start_services() {
+    # Start up Greenlight
+    docker-compose -f $GREENLIGHT/docker-compose.yml up -d
+    # Start up BBB
+    bbb-conf --start
+}
 
-# Start up Greenlight
-docker-compose -f $GREENLIGHT/docker-compose.yml up -d
-# Start up BBB
-bbb-conf --start
+function run_checks() {
+    # Run checks
+    echo "=== I'm waiting for some seconds to give services some time to spin up..."
+    sleep 30
+    bbb-conf --check
+    # Print status
+    bbb-conf --status
+}
 
-# Run checks
-echo "=== I'm waiting for some seconds to give services some time to spin up..."
-sleep 30
-bbb-conf --check
-# Print status
-bbb-conf --status
+stop_services
+rsync_all
+fix_things
+start_services
+run_checks
