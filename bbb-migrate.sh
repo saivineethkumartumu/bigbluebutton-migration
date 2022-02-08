@@ -49,6 +49,7 @@ function stop_services() {
 
     # Stop BBB
     bbb-conf --stop
+    
     # Also stop Greenlight, as we are syncing the PostgreSQL database
     docker-compose -f $GREENLIGHT/docker-compose.yml down
 }
@@ -58,10 +59,13 @@ function rsync_all() {
 
     # Sync Greenlight PostgreSQL database
     $RSYNC $SRC:$SRC_GREENLIGHT/db/ $GREENLIGHT/db/
+
     # Sync recordings
     $RSYNC $SRC:/var/bigbluebutton/ /var/bigbluebutton/
+
     # Sync whatever is in the freeswitch directory, if anything
     $RSYNC $SRC:/var/freeswitch/meetings/ /var/freeswitch/meetings/
+
     # NOTE: that's only something on my system; just remove it.
     $RSYNC $SRC:/docker-compose/ /docker-compose/ 
 }
@@ -78,6 +82,7 @@ function start_services() {
 
     # Start up Greenlight
     docker-compose -f $GREENLIGHT/docker-compose.yml up -d
+
     # Start up BBB
     bbb-conf --start
 }
@@ -85,10 +90,13 @@ function start_services() {
 function run_checks() {
     echo "= Running checks..."
 
+    SLEEP_DURATION=30
+    echo "=== I'm waiting for $SLEEP_DURATION seconds to give services some time to spin up..."
+    sleep $SLEEP_DURATION
+
     # Run checks
-    echo "=== I'm waiting for some seconds to give services some time to spin up..."
-    sleep 30
     bbb-conf --check
+
     # Print status
     bbb-conf --status
 }
