@@ -17,7 +17,9 @@
 # Easiest solution is to just use the version on your source server.
 #
 # As this scripts calls a dozen times ssh, you probably want to use a key and manage it via ssh-agent.
-# eval "$(ssh-agent -s)"
+# $ sudo -s
+# $ eval "$(ssh-agent -s)"
+# $ ssh-add ~user/.ssh/id_ecdsa
 
 
 echo "=== Please ensure BBB and Greenlight are stopped on the source server!"
