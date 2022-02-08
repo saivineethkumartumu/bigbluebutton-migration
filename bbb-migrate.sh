@@ -112,10 +112,28 @@ function print_current_meetings() {
     curl -s http://localhost:9688 | grep -E "^bbb_meetings "
 }
 
+function get_source_postgresql_password() {
+    SOURCE_POSTGRESQL_PASSWORD=$(ssh $SOURCE_SERVER "cat $SOURCE_GREENLIGHT_DIRECTORY/.env" | sed -n "s/^DB_PASSWORD=\(.*\)$/\1/p")
+    echo $SOURCE_POSTGRESQL_PASSWORD
+}
+
+function set_destination_postgresql_password() {
+    PASSWORD=$1
+
+    echo "= Setting PostgreSQL password in .env..."
+    sed --follow-symlinks -i -e "s/DB_PASSWORD=.*/DB_PASSWORD=$PASSWORD/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
+
+    echo "= Setting PostgreSQL password in docker-compose.yml..."
+    sed --follow-symlinks -i -e "s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$PASSWORD/g" $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml
+}
+
 print_header
 
 print_current_meetings
 read -p "Press enter to continue or CTRL-C to quit."
+
+POSTGRESQL_PASSWORD=$(get_source_postgresql_password)
+set_destination_postgresql_password $POSTGRESQL_PASSWORD
 
 stop_services
 
