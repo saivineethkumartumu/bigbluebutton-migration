@@ -29,6 +29,7 @@ echo "$ ssh-add ~user/.ssh/id_ecdsa"
 echo "= Please ensure BBB and Greenlight are stopped on the source server!"
 read -p "Press enter to continue."
 
+# Configuration
 
 # On the final run, --delete should probably be used; for test runs it's probably safer without --delete
 #RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y --delete-after"
@@ -49,7 +50,7 @@ function stop_services() {
 
     # Stop BBB
     bbb-conf --stop
-    
+
     # Also stop Greenlight, as we are syncing the PostgreSQL database
     docker-compose -f $GREENLIGHT/docker-compose.yml down
 }
