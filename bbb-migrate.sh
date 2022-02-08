@@ -21,8 +21,12 @@
 # $ eval "$(ssh-agent -s)"
 # $ ssh-add ~user/.ssh/id_ecdsa
 
+echo "= Please ensure you are root and have your ssh key loaded into the ssh-agent:"
+echo "$ sudo -s"
+echo "$ eval \"$(ssh-agent -s)\""
+echo "$ ssh-add ~user/.ssh/id_ecdsa"
 
-echo "=== Please ensure BBB and Greenlight are stopped on the source server!"
+echo "= Please ensure BBB and Greenlight are stopped on the source server!"
 read -p "Press enter to continue."
 
 
@@ -41,6 +45,8 @@ GREENLIGHT="/root/greenlight"
 SRC_GREENLIGHT="/home/marc/greenlight"
 
 function stop_services() {
+    echo "= Stopping services..."
+
     # Stop BBB
     bbb-conf --stop
     # Also stop Greenlight, as we are syncing the PostgreSQL database
@@ -48,6 +54,8 @@ function stop_services() {
 }
 
 function rsync_all() {
+    echo "= Synchronizing data..."
+
     # Sync Greenlight PostgreSQL database
     $RSYNC $SRC:$SRC_GREENLIGHT/db/ $GREENLIGHT/db/
     # Sync recordings
@@ -59,11 +67,15 @@ function rsync_all() {
 }
 
 function fix_things() {
+    echo "= Fixing things after synchronization..."
+
     # Fix the hostname in the recordings
     bbb-conf --setip $DST_HOSTNAME
 }
 
 function start_services() {
+    echo "= Starting services..."
+
     # Start up Greenlight
     docker-compose -f $GREENLIGHT/docker-compose.yml up -d
     # Start up BBB
@@ -71,6 +83,8 @@ function start_services() {
 }
 
 function run_checks() {
+    echo "= Running checks..."
+
     # Run checks
     echo "=== I'm waiting for some seconds to give services some time to spin up..."
     sleep 30
