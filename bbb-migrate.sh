@@ -104,7 +104,16 @@ function print_header() {
     read -p "Press enter to continue."
 }
 
+function print_current_meetings() {
+    echo "= Getting current meeting count from bbb-exporter..."
+    curl -s http://localhost:9688 | grep -E "^bbb_meetings "
+}
+
 print_header
+
+print_current_meetings
+read -p "Press enter to continue or CTRL-C to quit."
+
 stop_services
 
 echo "= Starting pre-synchronization..."
