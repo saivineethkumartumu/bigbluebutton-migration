@@ -26,7 +26,7 @@
 #RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y --delete-after"
 RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y"
 
-# Where the old BBB server is located; could also be an IP.
+# Where the old BBB server is located; could also be an IP. Must be root.
 SOURCE_SERVER="root@bbb4.avm-konferenz.de"
 
 # Hostname of the new server; must be the FQDN and not some "localhost" thing
