@@ -23,15 +23,19 @@
 #RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y --delete-after"
 RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y"
 
-# Where the old BBB server is located
-SRC="root@bbb4.avm-konferenz.de"
-# Hostname of the new server
-DST_HOSTNAME="bbb5.avm-konferenz.de"
+# Where the old BBB server is located; could also be an IP.
+SOURCE_SERVER="root@bbb4.avm-konferenz.de"
+
+# Hostname of the new server; must be the FQDN and not some "localhost" thing
+#DESTINATION_FQDN="bbb5.avm-konferenz.de"
+DESTINATION_FQDN=$(hostname -f)
+
+# Where greenlight was installed to by bbb-install.sh on the old server
+SOURCE_GREENLIGHT_DIRECTORY="/home/marc/greenlight"
 
 # Where greenlight was installed to by bbb-install.sh on this server
-GREENLIGHT="/root/greenlight"
-# Where greenlight was installed to by bbb-install.sh on the old server
-SRC_GREENLIGHT="/home/marc/greenlight"
+DESTINATION_GREENLIGHT_DIRECTORY="/root/greenlight"
+
 
 function stop_services() {
     echo "= Stopping services..."
@@ -40,37 +44,37 @@ function stop_services() {
     bbb-conf --stop
 
     # Also stop Greenlight, as we are syncing the PostgreSQL database
-    docker-compose -f $GREENLIGHT/docker-compose.yml down
+    docker-compose -f $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml down
 }
 
 function rsync_all() {
     echo "= Synchronizing data..."
 
     # Sync Greenlight PostgreSQL database
-    $RSYNC $SRC:$SRC_GREENLIGHT/db/ $GREENLIGHT/db/
+    $RSYNC $SOURCE_SERVER:$SOURCE_GREENLIGHT_DIRECTORY/db/ $DESTINATION_GREENLIGHT_DIRECTORY/db/
 
     # Sync recordings
-    $RSYNC $SRC:/var/bigbluebutton/ /var/bigbluebutton/
+    $RSYNC $SOURCE_SERVER:/var/bigbluebutton/ /var/bigbluebutton/
 
     # Sync whatever is in the freeswitch directory, if anything
-    $RSYNC $SRC:/var/freeswitch/meetings/ /var/freeswitch/meetings/
+    $RSYNC $SOURCE_SERVER:/var/freeswitch/meetings/ /var/freeswitch/meetings/
 
     # NOTE: that's only something on my system; just remove it.
-    $RSYNC $SRC:/docker-compose/ /docker-compose/ 
+    $RSYNC $SOURCE_SERVER:/docker-compose/ /docker-compose/ 
 }
 
 function fix_things() {
     echo "= Fixing things after synchronization..."
 
     # Fix the hostname in the recordings
-    bbb-conf --setip $DST_HOSTNAME
+    bbb-conf --setip $DESTINATION_FQDN
 }
 
 function start_services() {
     echo "= Starting services..."
 
     # Start up Greenlight
-    docker-compose -f $GREENLIGHT/docker-compose.yml up -d
+    docker-compose -f $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml up -d
 
     # Start up BBB
     bbb-conf --start
