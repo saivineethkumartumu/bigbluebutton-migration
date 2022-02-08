@@ -15,19 +15,7 @@
 # Older versions of Greenlight docker-compose.yml used PostgreSQL 9 while newer use 13.2.
 # Unfortunately, the database files are not binary compatible.
 # Easiest solution is to just use the version on your source server.
-#
-# As this scripts calls a dozen times ssh, you probably want to use a key and manage it via ssh-agent.
-# $ sudo -s
-# $ eval "$(ssh-agent -s)"
-# $ ssh-add ~user/.ssh/id_ecdsa
 
-echo "= Please ensure you are root and have your ssh key loaded into the ssh-agent:"
-echo "$ sudo -s"
-echo "$ eval \"$(ssh-agent -s)\""
-echo "$ ssh-add ~user/.ssh/id_ecdsa"
-
-echo "= Please ensure BBB and Greenlight are stopped on the source server!"
-read -p "Press enter to continue."
 
 # Configuration
 
@@ -102,8 +90,27 @@ function run_checks() {
     bbb-conf --status
 }
 
+function print_header() {
+    echo "= Please ensure you are root and have your ssh key loaded into the ssh-agent:"
+    echo "$ sudo -s"
+    echo "$ eval \"\$(ssh-agent -s)\""
+    echo "$ ssh-add ~user/.ssh/id_ecdsa"
+
+    echo ""
+    read -p "Press enter to continue."
+}
+
+print_header
 stop_services
+
+echo "= Starting pre-synchronization..."
 rsync_all
+
+echo "= Starting final synchronization..."
+echo "== Please ensure BBB and Greenlight are stopped on the source server!"
+read -p "Press enter to continue."
+rsync_all
+
 fix_things
 start_services
 run_checks
