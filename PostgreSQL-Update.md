@@ -14,6 +14,11 @@ See also:
 ## `pg_dump`
 Easiest is probably to just dump the SQL from the old PostgreSQL instance and load it again into the new PostgreSQL instance.
 
+See also:
+* <https://betterprogramming.pub/how-to-upgrade-your-postgresql-version-using-docker-d1e81dbbbdf9>
+* <https://www.cloudytuts.com/tutorials/docker/how-to-upgrade-postgresql-in-docker-and-kubernetes/>
+
+### Manual
 1. Dump SQL data: `docker exec -it greenlight_db_1 /usr/bin/pg_dumpall -U postgres > postgres_9.5.sql`
 2. Stop Greenlight: `docker-compose down`
 3. Move `db` to `db_backup_9.5`: `mv db db_backup_9.5`
@@ -22,6 +27,7 @@ Easiest is probably to just dump the SQL from the old PostgreSQL instance and lo
 6. Load the SQL data `docker exec -i greenlight_db_1 psql -U postgres < postgres_9.5.sql`
 7. Start Greenlight: `docker-compose up -d`
 
+### Long command line
 All in one:
 ```
 echo "== For now, we're only ensuring services are started, SQL dumped et cetera." && \
@@ -39,6 +45,5 @@ docker-compose up -d && \
 echo "Stuff is starting. Greenlight usually takes some time to do its migrations..."
 ```
 
-See also:
-* <https://betterprogramming.pub/how-to-upgrade-your-postgresql-version-using-docker-d1e81dbbbdf9>
-* <https://www.cloudytuts.com/tutorials/docker/how-to-upgrade-postgresql-in-docker-and-kubernetes/>
+### A script
+There's also `upgrade-postgresql.sh` script with slightly nicer logging.
