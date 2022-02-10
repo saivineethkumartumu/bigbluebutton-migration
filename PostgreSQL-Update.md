@@ -1,5 +1,5 @@
 # Updating PostgreSQL 9.5 to 13
-Older versions of Greenlight used PostgreSQL 9.5 in its `docker-compose.yml` whiler newer versions use version 13.
+Older versions of Greenlight used PostgreSQL 9.5 in its `docker-compose.yml` while newer versions use version 13.
 PostgreSQL databases are not backwards compatible and must therefore be upgraded. Such updates are not done automatically
 but must be invoked manually. The usual ways are a SQL dump with `pg_dump` followed by loading the data into the new database,
 or the `pg_upgrade` command which upgrades the binary datbase.
