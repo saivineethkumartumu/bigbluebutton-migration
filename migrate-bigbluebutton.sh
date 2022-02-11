@@ -90,7 +90,7 @@ function run_checks() {
     log "= Running checks..."
 
     SLEEP_DURATION=30
-    log "=== I'm waiting for $SLEEP_DURATION seconds to give services some time to spin up..."
+    log "== I'm waiting for $SLEEP_DURATION seconds to give services some time to spin up..."
     sleep $SLEEP_DURATION
 
     # Run checks
@@ -112,11 +112,13 @@ function print_header() {
 
 function print_current_meetings() {
     log "= Getting current meeting count from bbb-exporter..."
-    curl -s http://localhost:9688 | grep -E "^bbb_meetings "
+    COUNT=$(curl -s http://localhost:9688 | grep -E "^bbb_meetings ")
+    log "= Got current meeting count from bbb-exporter: $COUNT"
 }
 
 function set_destination_postgresql_password() {
     PASSWORD=$1
+    log "= Setting PostgreSQL password '$PASSWORD'..."
 
     set_destination_dotenv "DB_PASSWORD" "$PASSWORD"
 
@@ -125,38 +127,46 @@ function set_destination_postgresql_password() {
 }
 
 function get_source_postgresql_version() {
+    log "= Getting PostgreSQL version from source docker-compose.yml..."
+
     SOURCE_POSTGRESQL_VERSION=$(ssh $SOURCE_SERVER "cat $SOURCE_GREENLIGHT_DIRECTORY/docker-compose.yml" | sed -n "s/^    image: postgres:\(.*\)$/\1/p")
 
+    log "= Got PostgreSQL version from source docker-compose.yml: '$SOURCE_POSTGRESQL_VERSION'"
     echo $SOURCE_POSTGRESQL_VERSION
 }
 
 function set_destination_postgresql_version() {
     VERSION=$1
-
     log "= Setting PostgreSQL version '$VERSION' in docker-compose.yml..."
+
     sed --follow-symlinks -i -e "s/    image: postgres:.*/    image: postgres:$VERSION/g" $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml
 }
 
 function get_source_dotenv() {
     SOURCE_ENV_KEY="$1"
+    log "= Getting $SOURCE_ENV_KEY from source .env..."
+
     SOURCE_ENV_VALUE=$(ssh $SOURCE_SERVER "cat $SOURCE_GREENLIGHT_DIRECTORY/.env" | sed -n "s/^$SOURCE_ENV_KEY=\(.*\)$/\1/p")
+
+    log "= Got $SOURCE_ENV_KEY from source .env: '$SOURCE_ENV_VALUE'"
     echo $SOURCE_ENV_VALUE
 }
 
 function set_destination_dotenv() {
     DESTINATION_ENV_KEY="$1"
     DESTINATION_ENV_VALUE="$2"
+    log "= Setting '$DESTINATION_ENV_KEY'='$DESTINATION_ENV_VALUE' in destination .env..."
 
-    log "= Checking if '$DESTINATION_ENV_KEY' exists in .env"
+    log "== Checking if '$DESTINATION_ENV_KEY' exists in destination .env"
     if grep -q "^$DESTINATION_ENV_KEY=.*" "$DESTINATION_GREENLIGHT_DIRECTORY/.env"; then
-      log "= '$DESTINATION_ENV_KEY' exists in .env..."
+      log "== '$DESTINATION_ENV_KEY' exists in .env..."
     else
-      log "= '$DESTINATION_ENV_KEY' does not exist in .env"
-      log "= Adding empty '$DESTINATION_ENV_KEY' to .env..."
+      log "== Key '$DESTINATION_ENV_KEY' does not exist in destination .env"
+      log "== Adding empty '$DESTINATION_ENV_KEY' to .env..."
       echo "$DESTINATION_ENV_KEY=" >> "$DESTINATION_GREENLIGHT_DIRECTORY/.env"
     fi
 
-    log "= Setting key '$DESTINATION_ENV_KEY'='DESTINATION_ENV_VALUE' in .env..."
+    log "== Setting key '$DESTINATION_ENV_KEY'='$DESTINATION_ENV_VALUE' in destination .env..."
     sed --follow-symlinks -i -e "s/^$DESTINATION_ENV_KEY=.*/$DESTINATION_ENV_KEY=$DESTINATION_ENV_VALUE/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
 }
 
@@ -187,7 +197,7 @@ declare -a DOTENV_KEYS=(
     )
 for KEY in "${DOTENV_KEYS[@]}"
 do
-  log "= Transferring '$KEY'..."
+  log "= Transferring .env setting '$KEY'..."
   set_destination_dotenv "$KEY" $(get_source_dotenv "$KEY")
 done
 
