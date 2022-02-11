@@ -44,7 +44,7 @@ function log() {
 }
 
 function stop_services() {
-    echo "= Stopping services..."
+    log "= Stopping services..."
 
     # Stop BBB
     bbb-conf --stop
@@ -54,7 +54,7 @@ function stop_services() {
 }
 
 function rsync_all() {
-    echo "= Synchronizing data..."
+    log "= Synchronizing data..."
 
     # Sync Greenlight PostgreSQL database
     $RSYNC $SOURCE_SERVER:$SOURCE_GREENLIGHT_DIRECTORY/db/ $DESTINATION_GREENLIGHT_DIRECTORY/db/
@@ -70,14 +70,14 @@ function rsync_all() {
 }
 
 function fix_things() {
-    echo "= Fixing things after synchronization..."
+    log "= Fixing things after synchronization..."
 
     # Fix the hostname in the recordings
     bbb-conf --setip $DESTINATION_FQDN
 }
 
 function start_services() {
-    echo "= Starting services..."
+    log "= Starting services..."
 
     # Start up Greenlight
     docker-compose -f $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml up -d
@@ -87,10 +87,10 @@ function start_services() {
 }
 
 function run_checks() {
-    echo "= Running checks..."
+    log "= Running checks..."
 
     SLEEP_DURATION=30
-    echo "=== I'm waiting for $SLEEP_DURATION seconds to give services some time to spin up..."
+    log "=== I'm waiting for $SLEEP_DURATION seconds to give services some time to spin up..."
     sleep $SLEEP_DURATION
 
     # Run checks
@@ -101,17 +101,17 @@ function run_checks() {
 }
 
 function print_header() {
-    echo "= Please ensure you are root and have your ssh key loaded into the ssh-agent:"
-    echo "sudo -s"
-    echo "eval \"\$(ssh-agent -s)\""
-    echo "ssh-add ~$SUDO_USER/.ssh/id_ecdsa"
+    log "= Please ensure you are root and have your ssh key loaded into the ssh-agent:"
+    log "sudo -s"
+    log "eval \"\$(ssh-agent -s)\""
+    log "ssh-add ~$SUDO_USER/.ssh/id_ecdsa"
 
-    echo ""
+    log ""
     read -p "Press enter to continue."
 }
 
 function print_current_meetings() {
-    echo "= Getting current meeting count from bbb-exporter..."
+    log "= Getting current meeting count from bbb-exporter..."
     curl -s http://localhost:9688 | grep -E "^bbb_meetings "
 }
 
@@ -120,7 +120,7 @@ function set_destination_postgresql_password() {
 
     set_destination_dotenv "DB_PASSWORD" "$PASSWORD"
 
-    echo "= Setting PostgreSQL password '$PASSWORD' in docker-compose.yml..."
+    log "= Setting PostgreSQL password '$PASSWORD' in docker-compose.yml..."
     sed --follow-symlinks -i -e "s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$PASSWORD/g" $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml
 }
 
@@ -133,7 +133,7 @@ function get_source_postgresql_version() {
 function set_destination_postgresql_version() {
     VERSION=$1
 
-    echo "= Setting PostgreSQL version '$VERSION' in docker-compose.yml..."
+    log "= Setting PostgreSQL version '$VERSION' in docker-compose.yml..."
     sed --follow-symlinks -i -e "s/    image: postgres:.*/    image: postgres:$VERSION/g" $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml
 }
 
@@ -147,16 +147,16 @@ function set_destination_dotenv() {
     DESTINATION_ENV_KEY="$1"
     DESTINATION_ENV_VALUE="$2"
 
-    echo "= Checking if '$DESTINATION_ENV_KEY' exists in .env"
+    log "= Checking if '$DESTINATION_ENV_KEY' exists in .env"
     if grep -q "^$DESTINATION_ENV_KEY=.*" "$DESTINATION_GREENLIGHT_DIRECTORY/.env"; then
-      echo "= '$DESTINATION_ENV_KEY' exists in .env..."
+      log "= '$DESTINATION_ENV_KEY' exists in .env..."
     else
-      echo "= '$DESTINATION_ENV_KEY' does not exist in .env"
-      echo "= Adding empty '$DESTINATION_ENV_KEY' to .env..."
+      log "= '$DESTINATION_ENV_KEY' does not exist in .env"
+      log "= Adding empty '$DESTINATION_ENV_KEY' to .env..."
       echo "$DESTINATION_ENV_KEY=" >> "$DESTINATION_GREENLIGHT_DIRECTORY/.env"
     fi
 
-    echo "= Setting key '$DESTINATION_ENV_KEY'='DESTINATION_ENV_VALUE' in .env..."
+    log "= Setting key '$DESTINATION_ENV_KEY'='DESTINATION_ENV_VALUE' in .env..."
     sed --follow-symlinks -i -e "s/^$DESTINATION_ENV_KEY=.*/$DESTINATION_ENV_KEY=$DESTINATION_ENV_VALUE/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
 }
 
@@ -165,7 +165,7 @@ print_header
 print_current_meetings
 read -p "Press enter to continue or CTRL-C to quit."
 
-echo "= Transferring Greenlight settings..."
+log "= Transferring Greenlight settings..."
 POSTGRESQL_PASSWORD=$(get_source_dotenv "DB_PASSWORD")
 set_destination_postgresql_password $POSTGRESQL_PASSWORD
 
@@ -187,17 +187,17 @@ declare -a DOTENV_KEYS=(
     )
 for KEY in "${DOTENV_KEYS[@]}"
 do
-  echo "= Transferring '$KEY'..."
+  log "= Transferring '$KEY'..."
   set_destination_dotenv "$KEY" $(get_source_dotenv "$KEY")
 done
 
 stop_services
 
-echo "= Starting pre-synchronization..."
+log "= Starting pre-synchronization..."
 rsync_all
 
-echo "= Starting final synchronization..."
-echo "== Please ensure BBB and Greenlight are stopped on the source server!"
+log "= Starting final synchronization..."
+log "== Please ensure BBB and Greenlight are stopped on the source server!"
 read -p "Press enter to continue."
 rsync_all
 
