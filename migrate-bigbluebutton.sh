@@ -144,10 +144,17 @@ function set_destination_dotenv() {
     DESTINATION_ENV_KEY="$1"
     DESTINATION_ENV_VALUE="$2"
 
+    echo "= Checking if '$DESTINATION_ENV_KEY' exists in .env"
+    if grep -q "^$DESTINATION_ENV_KEY=.*" "$DESTINATION_GREENLIGHT_DIRECTORY/.env"; then
+      echo "= '$DESTINATION_ENV_KEY' exists in .env..."
+    else
+      echo "= '$DESTINATION_ENV_KEY' does not exist in .env"
+      echo "= Adding empty '$DESTINATION_ENV_KEY' to .env..."
+      echo "$DESTINATION_ENV_KEY=" >> "$DESTINATION_GREENLIGHT_DIRECTORY/.env"
+    fi
+
     echo "= Setting key '$DESTINATION_ENV_KEY'='DESTINATION_ENV_VALUE' in .env..."
     sed --follow-symlinks -i -e "s/^$DESTINATION_ENV_KEY=.*/$DESTINATION_ENV_KEY=$DESTINATION_ENV_VALUE/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
-
-    # TODO: add entry if not yet existing
 }
 
 print_header
