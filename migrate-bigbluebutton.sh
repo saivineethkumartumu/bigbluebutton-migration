@@ -164,8 +164,15 @@ set_destination_postgresql_password $POSTGRESQL_PASSWORD
 POSTGRESQL_VERSION=$(get_source_postgresql_version)
 set_destination_postgresql_version $POSTGRESQL_VERSION
 
-set_destination_dotenv "RECAPTCHA_SITE_KEY" $(get_source_dotenv "RECAPTCHA_SITE_KEY")
-set_destination_dotenv "RECAPTCHA_SECRET_KEY" $(get_source_dotenv "RECAPTCHA_SECRET_KEY")
+declare -a DOTENV_KEYS=(
+    "RECAPTCHA_SITE_KEY"
+    "RECAPTCHA_SECRET_KEY"
+    )
+for KEY in "${DOTENV_KEYS[@]}"
+do
+  echo "= Transferring '$KEY'..."
+  set_destination_dotenv "$KEY" $(get_source_dotenv "$KEY")
+done
 
 stop_services
 
