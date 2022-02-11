@@ -120,8 +120,7 @@ function get_source_postgresql_password() {
 function set_destination_postgresql_password() {
     PASSWORD=$1
 
-    echo "= Setting PostgreSQL password '$PASSWORD' in .env..."
-    sed --follow-symlinks -i -e "s/DB_PASSWORD=.*/DB_PASSWORD=$PASSWORD/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
+    set_destination_dotenv "DB_PASSWORD" "$PASSWORD"
 
     echo "= Setting PostgreSQL password '$PASSWORD' in docker-compose.yml..."
     sed --follow-symlinks -i -e "s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$PASSWORD/g" $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml
@@ -140,6 +139,19 @@ function set_destination_postgresql_version() {
     sed --follow-symlinks -i -e "s/    image: postgres:.*/    image: postgres:$VERSION/g" $DESTINATION_GREENLIGHT_DIRECTORY/docker-compose.yml
 }
 
+function get_source_dotenv() {
+    SOURCE_ENV_KEY="$1"
+    SOURCE_ENV_VALUE=$(ssh $SOURCE_SERVER "cat $SOURCE_GREENLIGHT_DIRECTORY/.env" | sed -n "s/^$SOURCE_ENV_KEY=\(.*\)$/\1/p")
+    echo $SOURCE_ENV_VALUE
+}
+
+function set_destination_dotenv() {
+    DESTINATION_ENV_KEY="$1"
+    DESTINATION_ENV_VALUE="$2"
+
+    echo "= Setting key '$DESTINATION_ENV_KEY'='DESTINATION_ENV_VALUE' in .env..."
+    sed --follow-symlinks -i -e "s/$DESTINATION_ENV_KEY=.*/$DESTINATION_ENV_KEY=$DESTINATION_ENV_VALUE/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
+}
 
 print_header
 
@@ -151,6 +163,9 @@ set_destination_postgresql_password $POSTGRESQL_PASSWORD
 
 POSTGRESQL_VERSION=$(get_source_postgresql_version)
 set_destination_postgresql_version $POSTGRESQL_VERSION
+
+set_destination_dotenv "RECAPTCHA_SITE_KEY" $(get_source_dotenv "RECAPTCHA_SITE_KEY")
+set_destination_dotenv "RECAPTCHA_SECRET_KEY" $(get_source_dotenv "RECAPTCHA_SECRET_KEY")
 
 stop_services
 
