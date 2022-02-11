@@ -39,6 +39,9 @@ SOURCE_GREENLIGHT_DIRECTORY="/home/marc/greenlight"
 # Where greenlight was installed to by bbb-install.sh on this server
 DESTINATION_GREENLIGHT_DIRECTORY="/root/greenlight"
 
+function log() {
+    echo "$@" 1>&2;
+}
 
 function stop_services() {
     echo "= Stopping services..."
