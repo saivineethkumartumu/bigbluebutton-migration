@@ -167,6 +167,15 @@ set_destination_postgresql_version $POSTGRESQL_VERSION
 declare -a DOTENV_KEYS=(
     "RECAPTCHA_SITE_KEY"
     "RECAPTCHA_SECRET_KEY"
+    "SMTP_SERVER"
+    "SMTP_PORT"
+    "SMTP_DOMAIN"
+    "SMTP_USERNAME"
+    "SMTP_PASSWORD"
+    "SMTP_AUTH"
+    "SMTP_STARTTLS_AUTO"
+    "SMTP_SENDER"
+    "SMTP_TEST_RECIPIENT"
     )
 for KEY in "${DOTENV_KEYS[@]}"
 do
