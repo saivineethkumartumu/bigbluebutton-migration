@@ -112,11 +112,6 @@ function print_current_meetings() {
     curl -s http://localhost:9688 | grep -E "^bbb_meetings "
 }
 
-function get_source_postgresql_password() {
-    SOURCE_POSTGRESQL_PASSWORD=$(ssh $SOURCE_SERVER "cat $SOURCE_GREENLIGHT_DIRECTORY/.env" | sed -n "s/^DB_PASSWORD=\(.*\)$/\1/p")
-    echo $SOURCE_POSTGRESQL_PASSWORD
-}
-
 function set_destination_postgresql_password() {
     PASSWORD=$1
 
@@ -158,7 +153,7 @@ print_header
 print_current_meetings
 read -p "Press enter to continue or CTRL-C to quit."
 
-POSTGRESQL_PASSWORD=$(get_source_postgresql_password)
+POSTGRESQL_PASSWORD=$(get_source_dotenv "DB_PASSWORD")
 set_destination_postgresql_password $POSTGRESQL_PASSWORD
 
 POSTGRESQL_VERSION=$(get_source_postgresql_version)
