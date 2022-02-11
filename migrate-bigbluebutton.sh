@@ -162,6 +162,7 @@ print_header
 print_current_meetings
 read -p "Press enter to continue or CTRL-C to quit."
 
+echo "= Transferring Greenlight settings..."
 POSTGRESQL_PASSWORD=$(get_source_dotenv "DB_PASSWORD")
 set_destination_postgresql_password $POSTGRESQL_PASSWORD
 
