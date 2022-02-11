@@ -146,6 +146,8 @@ function set_destination_dotenv() {
 
     echo "= Setting key '$DESTINATION_ENV_KEY'='DESTINATION_ENV_VALUE' in .env..."
     sed --follow-symlinks -i -e "s/$DESTINATION_ENV_KEY=.*/$DESTINATION_ENV_KEY=$DESTINATION_ENV_VALUE/g" $DESTINATION_GREENLIGHT_DIRECTORY/.env
+
+    # TODO: add entry if not yet existing
 }
 
 print_header
