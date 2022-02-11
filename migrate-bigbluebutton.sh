@@ -99,9 +99,9 @@ function run_checks() {
 
 function print_header() {
     echo "= Please ensure you are root and have your ssh key loaded into the ssh-agent:"
-    echo "$ sudo -s"
-    echo "$ eval \"\$(ssh-agent -s)\""
-    echo "$ ssh-add ~user/.ssh/id_ecdsa"
+    echo "sudo -s"
+    echo "eval \"\$(ssh-agent -s)\""
+    echo "ssh-add ~$SUDO_USER/.ssh/id_ecdsa"
 
     echo ""
     read -p "Press enter to continue."
