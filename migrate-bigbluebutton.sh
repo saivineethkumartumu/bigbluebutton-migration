@@ -37,7 +37,7 @@ DESTINATION_FQDN=$(hostname -f)
 SOURCE_GREENLIGHT_DIRECTORY="/home/marc/greenlight"
 
 # Where greenlight was installed to by bbb-install.sh on this server
-DESTINATION_GREENLIGHT_DIRECTORY="/root/greenlight"
+DESTINATION_GREENLIGHT_DIRECTORY="/_deployment/greenlight"
 
 function log() {
     echo "$@" 1>&2;
