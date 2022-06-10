@@ -6,7 +6,7 @@ log() {
 DATETIME=$(date '+%Y-%m-%d_%H-%M-%S')
 
 log "Changing into Greenlight directory..."
-cd /root/greenlight/
+cd /_deployment/greenlight/
 
 log "Ensuring PostgreSQL is started..."
 docker-compose up -d db
@@ -29,7 +29,7 @@ rm -rf db
 
 DESTINATION_VERSION="13-alpine"
 log "Changing PostgreSQL image version to '$DESTINATION_VERSION'..."
-sed --follow-symlinks -i -e "s/    image: postgres:.*/    image: postgres:${DESTINATION_VERSION}/g" /root/greenlight/docker-compose.yml
+sed --follow-symlinks -i -e "s/    image: postgres:.*/    image: postgres:${DESTINATION_VERSION}/g" /_deployment/greenlight/docker-compose.yml
 
 log "Starting PostgreSQL..."
 docker-compose up -d db
