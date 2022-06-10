@@ -21,7 +21,7 @@
 # But you can also use upgrade-postgresql.sh which simplifies the upgrade.
 
 
-# Configuration
+### Configuration
 
 # On the final run, --delete should probably be used; for test runs it's probably safer without --delete
 #RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y --delete-after"
@@ -31,7 +31,6 @@ RSYNC="rsync -a -x -AHX -S --numeric-ids -v -P --stats -h -y"
 SOURCE_SERVER="root@bbb4.avm-konferenz.de"
 
 # Hostname of the new server; must be the FQDN and not some "localhost" thing
-#DESTINATION_FQDN="bbb5.avm-konferenz.de"
 DESTINATION_FQDN=$(hostname -f)
 
 # Where greenlight was installed to by bbb-install.sh on the old server
@@ -39,6 +38,9 @@ SOURCE_GREENLIGHT_DIRECTORY="/home/marc/greenlight"
 
 # Where greenlight was installed to by bbb-install.sh on this server
 DESTINATION_GREENLIGHT_DIRECTORY="/_deployment/greenlight"
+
+
+### Code
 
 function log() {
     echo "$@" 1>&2;
@@ -204,11 +206,11 @@ done
 
 stop_services
 
-log "= Starting pre-synchronization..."
+log "= Starting pre-synchronization (reduces amount of time needed by final step)..."
 rsync_all
 
 log "= Starting final synchronization..."
-log "== Please ensure BBB and Greenlight are stopped on the source server!"
+log "== Please ensure BBB and Greenlight are now stopped on the source server!"
 read -p "Press enter to continue."
 rsync_all
 
