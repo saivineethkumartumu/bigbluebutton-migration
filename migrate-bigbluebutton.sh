@@ -18,6 +18,7 @@
 # Older versions of Greenlight docker-compose.yml used PostgreSQL 9 while newer use 13.2.
 # Unfortunately, the database files are not binary compatible.
 # Easiest solution is to just use the version on your source server.
+# But you can also use upgrade-postgresql.sh which simplifies the upgrade.
 
 
 # Configuration
