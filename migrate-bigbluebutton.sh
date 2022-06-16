@@ -108,6 +108,8 @@ function print_header() {
     log "sudo -s"
     log "eval \"\$(ssh-agent -s)\""
     log "ssh-add ~$SUDO_USER/.ssh/id_ecdsa"
+    log
+    log "If you used ssh agent forwarding, just use: sudo -s --preserve-env=SSH_AUTH_SOCK"
 
     log ""
     read -p "Press enter to continue."
