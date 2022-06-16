@@ -62,14 +62,14 @@ function rsync_all() {
     # Sync Greenlight PostgreSQL database
     $RSYNC $SOURCE_SERVER:$SOURCE_GREENLIGHT_DIRECTORY/db/ $DESTINATION_GREENLIGHT_DIRECTORY/db/
 
-    # Sync recordings
-    $RSYNC $SOURCE_SERVER:/var/bigbluebutton/ /var/bigbluebutton/
+    # # Sync recordings
+    # $RSYNC $SOURCE_SERVER:/var/bigbluebutton/ /var/bigbluebutton/
 
-    # Sync whatever is in the freeswitch directory, if anything
-    $RSYNC $SOURCE_SERVER:/var/freeswitch/meetings/ /var/freeswitch/meetings/
+    # # Sync whatever is in the freeswitch directory, if anything
+    # $RSYNC $SOURCE_SERVER:/var/freeswitch/meetings/ /var/freeswitch/meetings/
 
-    # NOTE: that's only something on my system; just remove it.
-    $RSYNC $SOURCE_SERVER:/docker-compose/ /docker-compose/ 
+    # # NOTE: that's only something on my system; just remove it.
+    # $RSYNC $SOURCE_SERVER:/docker-compose/ /docker-compose/ 
 }
 
 function fix_things() {
@@ -185,24 +185,24 @@ set_destination_postgresql_password $POSTGRESQL_PASSWORD
 POSTGRESQL_VERSION=$(get_source_postgresql_version)
 set_destination_postgresql_version $POSTGRESQL_VERSION
 
-declare -a DOTENV_KEYS=(
-    "RECAPTCHA_SITE_KEY"
-    "RECAPTCHA_SECRET_KEY"
-    "SMTP_SERVER"
-    "SMTP_PORT"
-    "SMTP_DOMAIN"
-    "SMTP_USERNAME"
-    "SMTP_PASSWORD"
-    "SMTP_AUTH"
-    "SMTP_STARTTLS_AUTO"
-    "SMTP_SENDER"
-    "SMTP_TEST_RECIPIENT"
-    )
-for KEY in "${DOTENV_KEYS[@]}"
-do
-  log "= Transferring .env setting '$KEY'..."
-  set_destination_dotenv "$KEY" $(get_source_dotenv "$KEY")
-done
+# declare -a DOTENV_KEYS=(
+#     "RECAPTCHA_SITE_KEY"
+#     "RECAPTCHA_SECRET_KEY"
+#     "SMTP_SERVER"
+#     "SMTP_PORT"
+#     "SMTP_DOMAIN"
+#     "SMTP_USERNAME"
+#     "SMTP_PASSWORD"
+#     "SMTP_AUTH"
+#     "SMTP_STARTTLS_AUTO"
+#     "SMTP_SENDER"
+#     "SMTP_TEST_RECIPIENT"
+#     )
+# for KEY in "${DOTENV_KEYS[@]}"
+# do
+#   log "= Transferring .env setting '$KEY'..."
+#   set_destination_dotenv "$KEY" $(get_source_dotenv "$KEY")
+# done
 
 stop_services
 
